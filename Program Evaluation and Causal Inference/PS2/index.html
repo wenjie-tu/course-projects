@@ -16,7 +16,7 @@
 <meta name="author" content="Zunhan Zhang" />
 
 
-<title>Problem Set 5</title>
+<title>Problem Set 2</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -427,7 +427,7 @@ summary {
 
 
 
-<h1 class="title toc-ignore">Problem Set 5</h1>
+<h1 class="title toc-ignore">Problem Set 2</h1>
 <h3 class="subtitle">Program Evaluation and Causal Inference</h3>
 <h4 class="author">Christian Birchler</h4>
 <h4 class="author">Fenqi Guo</h4>
@@ -439,202 +439,559 @@ summary {
 </div>
 
 
-<div id="difference-in-differences" class="section level1">
-<h1>Difference-in-Differences</h1>
-<div id="identification-in-the-did-model-with-constant-effects" class="section level2">
-<h2>1. Identification in the DiD model with constant effects</h2>
-<p><span class="math display">\[
-y_{it}=\delta_0+\delta_1\pmb{1}(T_t=2)+\delta_2\pmb{1}(D_i=1)+
-\delta_3\pmb{1}(T_t=2)\pmb{1}(D_i=1)+u_{it}
-\]</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-u_{it}&amp;=\lambda_t+\theta_i+\epsilon_{it}
-\end{aligned}
-\]</span></p>
+<div id="causal-parameters-and-the-selection-problem" class="section level3">
+<h3>1. Causal parameters and the selection problem</h3>
+</div>
 <div id="a" class="section level3">
 <h3>1(a)</h3>
-<p>Before treatment</p>
-<p><span class="math display">\[
-\begin{cases}
-\mathbb{E}(y_{it}|T_t=1,D_i=0)=\delta_0+
-\mathbb{E}(\lambda_t|T_t=1)+\mathbb{E}(\theta_i|D_i=0) &amp; 
-\text{period 1 before treatment}
-\\
-\mathbb{E}(y_{it}|T_t=2,D_i=0)=\delta_0+\delta_1+
-\mathbb{E}(\lambda_t|T_t=2)+\mathbb{E}(\theta_i|D_i=0) &amp; 
-\text{period 2 before treatment}
-\end{cases}
-\]</span></p>
-<p><span class="math display">\[
-\mathbb{E}(y_{it}|T_t=2,D_i=0)-\mathbb{E}(y_{it}|T_t=1,D_i=0)=\delta_1+
-\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)
-\]</span> After treatment</p>
-<p><span class="math display">\[
-\begin{cases}
-\mathbb{E}(y_{it}|T_t=1,D_i=1)=\delta_0+\delta_2+
-\mathbb{E}(\lambda_t|T_t=1)+\mathbb{E}(\theta_i|D_i=1) &amp;
-\text{period 1 after treatment}
-\\
-\mathbb{E}(y_{it}|T_t=2,D_i=1)=\delta_0+\delta_1+\delta_2+\delta_3+
-\mathbb{E}(\lambda_t|T_t=2)+\mathbb{E}(\theta_i|D_i=1) &amp;
-\text{period 2 after treatment}
-\end{cases}
-\]</span></p>
-<p><span class="math display">\[
-\mathbb{E}(y_{it}|T_t=2,D_i=1)-\mathbb{E}(y_{it}|T_t=1,D_i=1)=\delta_1+\delta_3+
-\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)
-\]</span></p>
-<p>DiD estimator</p>
-<p><span class="math display">\[
+<p>The average treatment effect <strong>ATE</strong> is the expected impact of treatment on the entire population: <span class="math display">\[
 \begin{aligned}
-\Delta^{DiD}&amp;=
-\left\{\mathbb{E}(y_{it}|T_t=2,D_i=1)-\mathbb{E}(y_{it}|T_t=1,D_i=1)\right\}-
-\left\{\mathbb{E}(y_{it}|T_t=2,D_i=0)-\mathbb{E}(y_{it}|T_t=1,D_i=0)\right\} \\
-&amp;=\delta_1+\delta_3+\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)-
-(\delta_1+
-\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)) \\
-&amp;=\delta_3
+    \Delta^{ATE}&amp;=\mathbb{E}(Y_{1i})-\mathbb{E}(Y_{0i}) \\
+    &amp;=\mathbb{E}(Y_{1i}-Y_{0i})
 \end{aligned}
 \]</span></p>
-<p>We see that taking first difference eliminates <span class="math inline">\(\theta_i\)</span> across groups and taking difference in differences eliminates <span class="math inline">\(\lambda_t\)</span> across periods.</p>
+<p>The average treatment effect on the treated <strong>ATT</strong> is the expected impact of treatment on those who want to get treated. <span class="math display">\[
+\begin{aligned}
+    \Delta^{ATT}&amp;=\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=1) \\
+    &amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=1)
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(Y_{1i}\)</span> is observable while <span class="math inline">\(Y_{0i}\)</span> is unobservable.</p>
+<p>The average treatment effect on the untreated <strong>ATUT</strong> is the expected impact of treatment on those who do not want to get treated. <span class="math display">\[
+\begin{aligned}
+    \Delta^{ATUT}&amp;=\mathbb{E}(Y_{1i}|D=0)-\mathbb{E}(Y_{0i}|D=0) \\
+    &amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=0)
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(Y_{0i}|D=0\)</span> is observable while <span class="math inline">\(Y_{1i}|D=0\)</span> is unobservable.</p>
+<p>The naive estimate <span class="math inline">\(\Delta^{N}\)</span> is the difference between the expected value of the observed outcome with treatment and the expected value of the observed outcome without treatment. <span class="math display">\[
+\Delta^N=\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=0)
+\]</span> Both <span class="math inline">\(Y_{1i}|D=1\)</span> and <span class="math inline">\(Y_{0i}|D=0\)</span> are observable</p>
 </div>
 <div id="b" class="section level3">
 <h3>1(b)</h3>
-<p>In order to identify the DiD estimator, we need to assume the error term <span class="math inline">\(\epsilon_{it}\)</span></p>
+<span class="math display">\[
+\begin{aligned}
+    \Delta^{ATE}&amp;=\mathbb{E}(Y_{1i})-E(Y_{0i}) \\
+    &amp;=\mathbb{E}(Y_{1i}-Y_{0i}) \\
+    &amp;=\mathbb{E}_d[E(Y_{1i}-Y_{0i}|D=d)] \\
+    &amp;=Pr(D=1) \times \underbrace{\mathbb{E}(Y_{1i}-Y_{0i}|D=1)}_{\Delta^{ATT}}
+    + (1-Pr(D=1)) \times \underbrace{\mathbb{E}(Y_{1i}-Y_{0i}|D=0)}_{\Delta^{ATUT}}\\
+    &amp;=Pr(D=1)\times\Delta^{ATT} + (1-Pr(D=1))\times\Delta^{ATUT}
+\end{aligned}
+\]</span> Why identification fails?
+Assumptions to identify <span class="math inline">\(ATE\)</span>
 </div>
+<div id="c" class="section level3">
+<h3>1(c)</h3>
+<p><span class="math display">\[
+\begin{aligned}
+    \Delta^{ATT}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=1) \\
+    &amp;=\underbrace{\mathbb{E}(Y_{1i}-Y_{0i})}_{\Delta^{ATE}}+
+    \underbrace{\mathbb{E}(Y_{1i}-Y_{0i}|D=1)-\mathbb{E}(Y_{1i}-Y_{0i})}_
+    \text{bias term}\\
+\end{aligned}
+\]</span> <span class="math display">\[
+\begin{aligned}
+    \Delta^{ATUT}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=0) \\
+    &amp;=\underbrace{\mathbb{E}(Y_{1i}-Y_{0i})}_{\Delta^{ATE}}+
+    \underbrace{\mathbb{E}(Y_{1i}-Y_{0i}|D=0)-\mathbb{E}(Y_{1i}-Y_{0i})}_
+    \text{bias term}\\
+\end{aligned}
+\]</span></p>
 </div>
-<div id="replication-of-card-and-krueger-1994" class="section level2">
-<h2>2. Replication of Card and Krueger (1994)</h2>
+<div id="d" class="section level3">
+<h3>1(d)</h3>
+<p><span class="math display">\[
+\begin{aligned}
+    \Delta^N&amp;=\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=0) \\
+    &amp;=\mathbb{E}(Y_{1i}|D=1) -\mathbb{E}(Y_{0i}|D=0)
+    \color{red}{-\mathbb{E}(Y_{0i}|D=1)+\mathbb{E}(Y_{0i}|D=1)} \\
+    &amp;=\underbrace{\mathbb{E}(Y_{1i}-Y_{0i}|D=1)}_{\Delta^{ATT}}+
+    \underbrace{\mathbb{E}(Y_{0i}|D=1)-\mathbb{E}(Y_{0i}|D=0)}_\text{bias term} \\
+\end{aligned}
+\]</span> <span class="math display">\[\mathbb{E}(Y_{0i}|D=1)=\mathbb{E}(Y_{0i}|D=0) \implies \Delta^N=\Delta^{ATT}\]</span> Example:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Master (<span class="math inline">\(D=0\)</span>)</th>
+<th align="right">PhD (<span class="math inline">\(D=1\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Master earnings (<span class="math inline">\(Y_0\)</span>)</td>
+<td align="right">90000</td>
+<td align="right">120000</td>
+</tr>
+<tr class="even">
+<td align="left">PhD earnings (<span class="math inline">\(Y_1\)</span>)</td>
+<td align="right">70000</td>
+<td align="right">150000</td>
+</tr>
+</tbody>
+</table>
+<p>In the control sample <span class="math inline">\(Y_{0i}\)</span> (those who got master’s degree but did not have a doctor’s degree), the earnings between those who did not want to do a PhD (<span class="math inline">\(Y_{0i}|D=0\)</span>), and those who did want to do a PhD (<span class="math inline">\(Y_{0i}|D=1\)</span>) are different from zero, which leads to a biased estimator for the <em>Average Treatment Effect on the Treated</em>. As we can see from the table, those who do not want to do a PhD are more likely to self-select themselves into the control group while those who do want to do a PhD are more likely to self-select themselves into the treatment group. The reason is that both can benefit from this experiment. Therefore, the assumption <span class="math inline">\(\mathbb{E}(Y_{0i}|D=1)=\mathbb{E}(Y_{0i}|D=0)\)</span> does not hold in this example.</p>
+</div>
+<div id="self-selection" class="section level3">
+<h3>2. Self selection</h3>
+</div>
 <div id="a-1" class="section level3">
 <h3>2(a)</h3>
-<pre class="r"><code># read csv file
-raw.data &lt;- read.csv(&#39;did_card_krueger.csv&#39;)
-
-# drop rows with sample equal to 0
-data &lt;- raw.data[raw.data$sample==1, ]</code></pre>
-<pre class="r"><code># check classes of all dataframe columns
-str(data)</code></pre>
 <p><span class="math display">\[
-\text{state}
-\begin{cases}
-1 &amp; \text{NJ} \\
-0 &amp; \text{PA}
-\end{cases}
+\begin{aligned}
+    \Delta^{ATE}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}) \\
+    &amp;=\mathbb{E}[(\beta_0+\beta_1+\epsilon_{1i})-(\beta_0+\epsilon_{0i})] \\
+    &amp;=\mathbb{E}(\beta_1+\epsilon_{1i}-\epsilon_{0i}) \\
+    &amp;=\mathbb{E}(\beta_1)+\mathbb{E}(\epsilon_{1i})+\mathbb{E}(\epsilon_{0i}) \\
+    &amp;=\mathbb{E}(\beta_1)
+\end{aligned}
 \]</span></p>
-<pre class="r"><code># first interview wave
-ave.fte.NJ &lt;- mean(data$fte[data$state==1])
-ave.fte.PA &lt;- mean(data$fte[data$state==0])
-
-# second interview wave
-ave.fte2.NJ &lt;- mean(data$fte2[data$state==1])
-ave.fte2.PA &lt;- mean(data$fte2[data$state==0])
-
-cat(sprintf(&#39;The average employment in NJ for the first interview wave is %.2f
-           \nThe average employment in PA for the first interview wave is %.2f
-           \nThe average employment in NJ for the second interview wave is %.2f
-           \nThe average employment in PA for the second interview wave is %.2f&#39;, 
-           ave.fte.NJ, ave.fte.PA, ave.fte2.NJ, ave.fte2.PA))</code></pre>
-<p>The average employment in NJ for the first interview wave is 17.28</p>
-<p>The average employment in PA for the first interview wave is 20.11</p>
-<p>The average employment in NJ for the second interview wave is 17.56</p>
-<p>The average employment in PA for the second interview wave is 18.10</p>
-<pre class="r"><code># employment difference in NJ (treatment)
-ave.dfte.NJ &lt;- ave.fte2.NJ - ave.fte.NJ
-
-# employment difference in PA (comparison)
-ave.dfte.PA &lt;- ave.fte2.PA - ave.fte.PA
-
-cat(sprintf(
-&#39;Difference in average employment between second and first interviews in NJ is %.2f
-\nDifference in average employment between second and first interviews in PA is %.2f&#39;, 
-ave.dfte.NJ, ave.dfte.PA))</code></pre>
-<p>Difference in average employment between second and first interviews in NJ is 0.29</p>
-<p>Difference in average employment between second and first interviews in PA is -2.02</p>
-<pre class="r"><code>didfte &lt;- ave.dfte.NJ - ave.dfte.PA
-
-cat(sprintf(&#39;The difference between NJ and PA of the time differences is %.2f&#39;, 
-            didfte))</code></pre>
-<p>The difference between NJ and PA of the time differences is 2.30</p>
-In order to obtain a valid estimate of the employment effect, the following conditions must be fulfilled:
-<p>From the DiD estimator, we see an increase in employment in New Jersey where the minimum wage was increased.</p>
 </div>
 <div id="b-1" class="section level3">
 <h3>2(b)</h3>
-<pre class="r"><code># subset data in NJ
-data.NJ &lt;- data[data$state==1, ]
-
-# high wage in NJ (comparison)
-data.NJ.hw &lt;- data.NJ[data.NJ$wage_st&gt;=5, ]
-
-# low wage in NJ (treatment)
-data.NJ.lw &lt;- data.NJ[data.NJ$wage_st&lt;5, ]
-
-# DiD estimator of starting wages obtained within NJ data
-didw.NJ &lt;- mean(data.NJ.lw$dw)-mean(data.NJ.hw$dw)
-
-# DiD estimator of employment obtained within NJ data
-didfte.NJ &lt;- mean(data.NJ.lw$dfte)-mean(data.NJ.hw$dfte)
-
-cat(sprintf(&#39;The relative impact of the minimum wage on starting wages is %.2f
-            \nThe relative impact of the minimum wage on employment is %.2f&#39;, 
-            didw.NJ, didfte.NJ))</code></pre>
-<pre><code>## The relative impact of the minimum wage on starting wages is 0.62
-##             
-## The relative impact of the minimum wage on employment is 3.30</code></pre>
+<p><span class="math display">\[
+\begin{aligned}
+    \Delta^{ATT}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=1) \\
+    &amp;=\mathbb{E}(\beta_1+\epsilon_{1i}-\epsilon_{0i}|D=1) \\
+    &amp;=\mathbb{E}(\beta_1|D=1)&gt;0
+\end{aligned}
+\]</span></p>
 </div>
-<div id="c" class="section level3">
+<div id="c-1" class="section level3">
 <h3>2(c)</h3>
-<pre class="r"><code>library(stargazer)</code></pre>
-<pre class="r"><code># regress change of employment on state 
-dfte.did1 &lt;- lm(dfte ~ as.factor(state), data=data)
-
-# regress change of starting wages on state
-dw.did1 &lt;- lm(dw ~ as.factor(state), data=data)
-
-# regress change of employment on state and other control variables
-dfte.did2 &lt;- lm(dfte ~ as.factor(state) + 
-                  as.factor(co_owned) + as.factor(chain), data=data)
-
-# regress change of starting wages on state and other control variables
-dw.did2 &lt;- lm(dw ~ as.factor(state) + 
-                as.factor(co_owned) + as.factor(chain), data=data)
-
-stargazer(dfte.did1, dw.did1, dfte.did2, dw.did2, keep=&#39;state&#39;, 
-          header=F, font.size=&#39;small&#39;, keep.stat=c(&#39;n&#39;, &#39;rsq&#39;), 
-          title=&#39;Comparison between regressions with and without control variables&#39;, 
-          column.labels=c(&#39;No controls&#39;, &#39;No controls&#39;, &#39;Controls&#39;, &#39;Controls&#39;))</code></pre>
+<p>If <span class="math inline">\(Y_{1i}&lt;Y_{0i}\)</span>, then <span class="math inline">\(D_i=0\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+    \begin{cases}
+        \Delta^{ATT}=\mathbb{E}(Y_{1i}-Y_{0i}|D=1)&gt;0 &amp; Y_{1i}&gt;Y_{0i} \\
+        \Delta^{ATUT}=\mathbb{E}(Y_{1i}-Y_{0i}|D=0)&lt;0 &amp; Y_{1i}&lt;Y_{0i}
+    \end{cases}
+\end{aligned}
+\]</span> From exercise (1) we know that <em>ATE</em> is a weighted average of the <em>ATT</em> and <em>ATUT</em>. <span class="math display">\[\Delta^{ATE}=Pr(D=1)\times\underbrace{\Delta^{ATT}}_\text{positive} + (1-Pr(D=1))\times\underbrace{\Delta^{ATUT}}_\text{negative}\]</span> Therefore, <span class="math inline">\(\Delta^{ATT}&gt;\Delta^{ATE}\)</span>.</p>
+<p>Intuition: Since there exists a self-selection bias, the average treatment effect on the treated would be more pronounced than it should have to be while the average treatment effect on the untreated would be negative.</p>
 </div>
-<div id="d" class="section level3">
-<h3>2(d)</h3>
-<pre class="r"><code># subset PA data
-data.PA &lt;- data[data$state==0, ]
+<div id="randomization-at-work" class="section level3">
+<h3>3. Randomization at work</h3>
+<pre class="r"><code># load libraries
+library(tidyverse)
+library(haven)
+library(randomizr)
+library(stargazer)
 
-# create a new variable like gap for restaurants in PA
-data.PA$gap4PA &lt;- ifelse(data.PA$wage_st&lt;5.05, (5.05-data.PA$wage_st)/data.PA$wage_st, 0)</code></pre>
-<pre class="r"><code># regress change in employment on gap4PA (PA)
-dfte.PA &lt;- lm(dfte ~ gap4PA, data=data.PA)
+# set seed for reproducibility
+set.seed(123)
 
-# regress change in wages on gap4PA (PA)
-dw.PA &lt;- lm(dw ~ gap4PA, data=data.PA)
+Data &lt;- read_dta(&#39;randomization_2021.dta&#39;)
 
-# regress change in employment on gap (NJ)
-dfte.NJ &lt;- lm(dfte ~ gap, data=data[data$state==1, ])
-
-# regress change in wages on gap (NJ)
-dw.NJ &lt;- lm(dw ~ gap, data=data[data$state==1, ])
-
-stargazer(dfte.PA, dw.PA, dfte.NJ, dw.NJ, header=F, 
-          keep.stat=c(&#39;n&#39;, &#39;rsq&#39;), omit=&#39;Constant&#39;, 
-          column.labels=c(&#39;PA&#39;, &#39;PA&#39;, &#39;NJ&#39;, &#39;NJ&#39;), 
-          title=&#39;Placebo test&#39;)</code></pre>
-<ul>
-<li><p>Column(1) and column(3) show that the coefficient on gap for Pennsylvania is small and not statistically different from zero while the coefficient on gap for New Jersey is large and statistically different from zero at 5% significance level. We cannot reject the null hypothesis in column(1).</p></li>
-<li><p>Column(2) and column(4) show that the coefficient on gap for Pennsylvania is smaller than the coefficient on gap for New Jersey. We can see that coefficient from <span class="math inline">\(\text{dw}=\beta\cdot\text{gap}+\epsilon\)</span> captures the impact of minimum wage increase on starting wage in those restaurants that were required to raise their wage when the policy was put in place. Such effects are stronger in New Jersey than in Pennsylvania.</p></li>
-</ul>
-<p>We know that there was no minimum wage increase in Pennsylvania during that period. We perform a <strong>placebo test</strong> using a “fake” treatment group. In this setting, the “fake” treatment group is the Pennsylvania where the minimum wage was assumed to be increased but actually remained at the federal level. Since the “fake” treatment group should not be affected by the program, we should expect small and insignificant coefficient in column(1) compared to the coefficient in column(3) and smaller coefficient in column(2) than in column(4). The regression results are consistent with our expectation and support the parallel trend assumption.</p>
+head(Data)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   black birthday  year    y0    y1
+##   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     1       16  2005  24.4  25.0
+## 2     1       10  2005  24.3  25.0
+## 3     0       28  2006  25.1  25.8
+## 4     0       29  2005  27.1  27.9
+## 5     1        5  2006  24.3  25.0
+## 6     1        4  2005  24.3  25.0</code></pre>
 </div>
+<div id="a-2" class="section level3">
+<h3>3(a)</h3>
+<p>From previous question, we derived <span class="math display">\[
+\Delta^N = \Delta^{ATT}+\underbrace{\color{red}{\mathbb{E}(Y_{0i}|D=1)-
+\mathbb{E}(Y_{0i}|D=0)}}_\text{selection bias}
+\]</span> The naive estimator uses the observable <span class="math inline">\(\mathbb{E}(Y_{0i}|D=0\)</span> in place of the missing counterfactual <span class="math inline">\(\mathbb{E}(Y_{0i}|D=1)\)</span>. Randomization is a method that minimizes the selection bias in the above formula. In other words, we want to make sure that in the realized outcome where people who get untreated, those who want to get treated and those who do not want to get treated are distributed in a way such that their conditional expected outcomes are almost the same.</p>
 </div>
+<div id="b-2" class="section level3">
+<h3>3(b)</h3>
+If I implement randomization, I will take the following points into account:
+<p>In practice, the situation gets much more complicated and we can never remove every single problem in our randomization. All we can do is to minimize those ``bad’’ effects in order to get a plausible outcome based on the randomization.</p>
+</div>
+<div id="c-2" class="section level3">
+<h3>3(c)</h3>
+<pre class="r"><code># randomize treatment
+Data$d &lt;- simple_ra(N=dim(Data)[1], prob=0.5)</code></pre>
+</div>
+<div id="d-1" class="section level3">
+<h3>3(d)</h3>
+<pre class="r"><code># before randomization
+x &lt;- mean(Data$y0[Data$black==1])
+y &lt;- mean(Data$y0[Data$black==0])
+bias &lt;- x - y
+
+# after randomization
+x.ra &lt;- mean(Data$y0[Data$d==1])
+y.ra &lt;- mean(Data$y0[Data$d==0])
+bias.ra &lt;- x.ra - y.ra
+
+cat(sprintf(&#39;Before the randomization, the selection bias is %.3f
+            \nAfter the randomization, the selection bias is %.3f&#39;, 
+            bias, bias.ra))</code></pre>
+<p>Before the randomization, the selection bias is -2.195</p>
+<p>After the randomization, the selection bias is 0.040</p>
+<p>The randomization worked as we see the selection bias gets closer to zero.</p>
+</div>
+<div id="e" class="section level3">
+<h3>3(e)</h3>
+<pre class="r"><code># create a variable y containing realized outcome
+Data$y &lt;- ifelse(Data$d==1, Data$y1, Data$y0)
+
+# estimate ATE
+ATE &lt;- mean(Data$y1-Data$y0)
+
+# estimate ATT
+ATT &lt;- mean(Data$y1[Data$d==1]-Data$y0[Data$d==1])
+
+cat(sprintf(&#39;The average treatment effect is %.3f
+            \nThe average treatment effect on treated is %.3f&#39;, 
+            ATE, ATT))</code></pre>
+<p>The average treatment effect is 0.696</p>
+<p>The average treatment effect on treated is 0.682</p>
+</div>
+<div id="f" class="section level3">
+<h3>3(f)</h3>
+<pre class="r"><code># regress the realized outcome on the randomized treatment variable
+model1 &lt;- lm(y ~ d, data=Data)
+stargazer(model1, keep.stat=c(&#39;n&#39;, &#39;rsq&#39;), font.size=&#39;small&#39;, 
+          type=&#39;html&#39;, out.header=T)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+y
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+d
+</td>
+<td>
+0.722<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.295)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+24.549<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.202)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+96
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.060
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p><span class="math display">\[
+\begin{aligned}
+    y_i&amp;=\alpha + \beta d_i + u_i \\
+    \\
+    \mathbb{E}(y_i|d_i)&amp;=\mathbb{E}(\alpha + \beta d_i + u_i|d_i) \\
+    &amp;=\alpha+\beta d_i + \underbrace{\mathbb{E}(u_i|d_i)}_\text{zero by assumption} \\
+    &amp;=\alpha + \beta d_i \\
+    \\
+    \mathbb{E}(y_i)&amp;=\mathbb{E}(\mathbb{E}(y_i|d_i)) \\
+    &amp;=\mathbb{E}(\alpha + \beta d_i) \\
+    &amp;=\alpha + \beta\mathbb{E}(d_i) \\
+    \\
+    \mathbb{E}(y_0)&amp;=\alpha+\beta\mathbb{E}(d_0)\\
+    &amp;\Downarrow \\
+    \hat{\alpha}&amp;=\overline{y}_0 \\
+    \\
+    \mathbb{E}(y_1)&amp;=\alpha+\beta\mathbb{E}(d_1) \\
+    &amp;\Downarrow \\
+    \hat{\beta}&amp;=\overline{y}_1-\hat{\alpha}\\
+    &amp;=\overline{y}_1-\overline{y}_0
+\end{aligned}
+\]</span></p>
+</div>
+<div id="g" class="section level3">
+<h3>3(g)</h3>
+<pre class="r"><code># include birthday as a regressor
+model2 &lt;- lm(y ~ d + birthday, data=Data)
+
+# include birthday and year as regressors
+model3 &lt;- lm(y ~ d + birthday + year, data=Data)
+stargazer(model1, model2, model3, keep.stat=c(&#39;n&#39;,&#39;rsq&#39;), 
+          font.size=&#39;small&#39;, header=F, omit=&#39;Constant&#39;, type=&#39;html&#39;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+y
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+d
+</td>
+<td>
+0.722<sup>**</sup>
+</td>
+<td>
+0.688<sup>**</sup>
+</td>
+<td>
+0.584<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.295)
+</td>
+<td>
+(0.297)
+</td>
+<td>
+(0.292)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+birthday
+</td>
+<td>
+</td>
+<td>
+0.008
+</td>
+<td>
+0.005
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.017)
+</td>
+<td>
+(0.016)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+year
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+-0.732<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.293)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+96
+</td>
+<td>
+95
+</td>
+<td>
+95
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.060
+</td>
+<td>
+0.057
+</td>
+<td>
+0.118
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>From column(1) to column(2) to column(3), we see a decrease in the causal parameter as we include more regressors. We might have omitted variable bias in our model and the sign of the bias is positive.</p>
+</div>
+<div id="h" class="section level3">
+<h3>3(h)</h3>
+<p>It is useful to include additional variables in the regression model since adding irrelevant variables will never affect the consistency of the estimator (it only affects the variance) while omitting relevant variables will render the estimator inconsistent, not to mention the variance. However, we should never add post-treatment controls as regressors in our model.</p>
+There are two effects in our case:
+<p>From column(1) to column(2), we see an increase in the standard error. The second effect dominates.</p>
+<p>From column(2) to column(3), we see an decrease in the standard error. The first effect dominates.</p>
+<p>Overall, the first effect dominates as we can see from column(1) to column(3).</p>
 </div>
 
 

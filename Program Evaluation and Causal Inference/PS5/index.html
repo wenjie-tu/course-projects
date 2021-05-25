@@ -16,7 +16,7 @@
 <meta name="author" content="Zunhan Zhang" />
 
 
-<title>Problem Set 4</title>
+<title>Problem Set 5</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -427,7 +427,7 @@ summary {
 
 
 
-<h1 class="title toc-ignore">Problem Set 4</h1>
+<h1 class="title toc-ignore">Problem Set 5</h1>
 <h3 class="subtitle">Program Evaluation and Causal Inference</h3>
 <h4 class="author">Christian Birchler</h4>
 <h4 class="author">Fenqi Guo</h4>
@@ -439,366 +439,575 @@ summary {
 </div>
 
 
-<div id="instrumental-variables" class="section level1">
-<h1>Instrumental Variables</h1>
-<div id="bias-of-the-iv-estimator" class="section level2">
-<h2>1. Bias of the IV estimator</h2>
+<div id="difference-in-differences" class="section level1">
+<h1>Difference-in-Differences</h1>
+<div id="identification-in-the-did-model-with-constant-effects" class="section level2">
+<h2>1. Identification in the DiD model with constant effects</h2>
 <p><span class="math display">\[
-y_i=\beta_0+\beta_1x_i+u_i
+y_{it}=\delta_0+\delta_1\pmb{1}(T_t=2)+\delta_2\pmb{1}(D_i=1)+
+\delta_3\pmb{1}(T_t=2)\pmb{1}(D_i=1)+u_{it}
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+u_{it}&amp;=\lambda_t+\theta_i+\epsilon_{it}
+\end{aligned}
 \]</span></p>
 <div id="a" class="section level3">
 <h3>1(a)</h3>
+<p>Before treatment</p>
+<p><span class="math display">\[
+\begin{cases}
+\mathbb{E}(y_{it}|T_t=1,D_i=0)=\delta_0+
+\mathbb{E}(\lambda_t|T_t=1)+\mathbb{E}(\theta_i|D_i=0) &amp; 
+\text{period 1 before treatment}
+\\
+\mathbb{E}(y_{it}|T_t=2,D_i=0)=\delta_0+\delta_1+
+\mathbb{E}(\lambda_t|T_t=2)+\mathbb{E}(\theta_i|D_i=0) &amp; 
+\text{period 2 before treatment}
+\end{cases}
+\]</span></p>
+<p><span class="math display">\[
+\mathbb{E}(y_{it}|T_t=2,D_i=0)-\mathbb{E}(y_{it}|T_t=1,D_i=0)=\delta_1+
+\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)
+\]</span> After treatment</p>
+<p><span class="math display">\[
+\begin{cases}
+\mathbb{E}(y_{it}|T_t=1,D_i=1)=\delta_0+\delta_2+
+\mathbb{E}(\lambda_t|T_t=1)+\mathbb{E}(\theta_i|D_i=1) &amp;
+\text{period 1 after treatment}
+\\
+\mathbb{E}(y_{it}|T_t=2,D_i=1)=\delta_0+\delta_1+\delta_2+\delta_3+
+\mathbb{E}(\lambda_t|T_t=2)+\mathbb{E}(\theta_i|D_i=1) &amp;
+\text{period 2 after treatment}
+\end{cases}
+\]</span></p>
+<p><span class="math display">\[
+\mathbb{E}(y_{it}|T_t=2,D_i=1)-\mathbb{E}(y_{it}|T_t=1,D_i=1)=\delta_1+\delta_3+
+\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)
+\]</span></p>
+<p>DiD estimator</p>
 <p><span class="math display">\[
 \begin{aligned}
-\hat{\beta}_{IV}&amp;=\frac{\widehat{Cov(y_i,z_i)}}{\widehat{Cov(x_i,z_i)}} \\
-&amp;=\frac{\sum_{i=1}^n(z_i-\overline{z})(y_i-\overline{y})}
-{\sum_{i=1}^n(z_i-\overline{z})(x_i-\overline{x})} \\
-&amp;=\frac{\sum_{i=1}^n(z_iy_i-z_i\overline{y}-y_i\overline{z}+\overline{y}\overline{z})}
-{\sum_{i=1}^n(z_ix_i-z_i\overline{x}-x_i\overline{z}+\overline{x}\overline{z})} \\
-&amp;=\frac{\sum_{i=1}^n(z_iy_i-y_i\overline{z})-\overline{y}\sum_{i=1}^nz_i+n\overline{y}\overline{z}}
-{\sum_{i=1}^n(z_ix_i-x_i\overline{z})-\overline{x}\sum_{i=1}^nz_i+n\overline{x}\overline{z}} \\
-&amp;=\frac{\sum_{i=1}^n(z_iy_i-y_i\overline{z})-n\overline{y}\overline{z}+n\overline{y}\overline{z}}
-{\sum_{i=1}^n(z_ix_i-x_i\overline{z})-n\overline{x}\overline{z}+n\overline{x}\overline{z}} \\
-&amp;=\frac{\sum_{i=1}^n(z_i-\overline{z})y_i}
-{\sum_{i=1}^n(z_i-\overline{z})x_i}
+\Delta^{DiD}&amp;=
+\left\{\mathbb{E}(y_{it}|T_t=2,D_i=1)-\mathbb{E}(y_{it}|T_t=1,D_i=1)\right\}-
+\left\{\mathbb{E}(y_{it}|T_t=2,D_i=0)-\mathbb{E}(y_{it}|T_t=1,D_i=0)\right\} \\
+&amp;=\delta_1+\delta_3+\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)-
+(\delta_1+
+\mathbb{E}(\lambda_t|T_t=2)-\mathbb{E}(\lambda_t|T_t=1)) \\
+&amp;=\delta_3
 \end{aligned}
 \]</span></p>
+<p>We see that taking first difference eliminates <span class="math inline">\(\theta_i\)</span> across groups and taking difference in differences eliminates <span class="math inline">\(\lambda_t\)</span> across periods.</p>
 </div>
 <div id="b" class="section level3">
 <h3>1(b)</h3>
-<p><span class="math display">\[
-\begin{aligned}
-\hat{\beta}_{IV}&amp;=\frac{\sum_{i=1}^n(z_i-\overline{z})y_i}
-{\sum_{i=1}^n(z_i-\overline{z})x_i} \\
-&amp;=\frac{\sum_{i=1}^n(z_i-\overline{z})(\beta_0+\beta_1x_i+u_i)}
-{\sum_{i=1}^n(z_i-\overline{z})x_i} \\
-&amp;=\frac{\beta_0\sum_{i=1}^n(z_i-\overline{z})+
-\beta_1\sum_{i=1}^n(z_i-\overline{z})x_i+\sum_{i=1}^n(z_i-\overline{z})u_i}
-{\sum_{i=1}^n(z_i-\overline{z})x_i} \\
-&amp;=\beta_1+\frac{\sum_{i=1}^n(z_i-\overline{z})u_i}
-{\sum_{i=1}^n(z_i-\overline{z})x_i}
-\end{aligned}
-\]</span></p>
-</div>
-<div id="c" class="section level3">
-<h3>1(c)</h3>
-<p><span class="math display">\[
-\begin{aligned}
-p\lim(\hat{\beta}_{IV}-\beta_1)&amp;=\frac{p\lim\sum_{i=1}^n(z_i-\overline{z})u_i}
-{p\lim\sum_{i=1}^n(z_i-\overline{z})x_i} \\
-&amp;=\frac{p\lim\sum_{i=1}^n(z_i-\overline{z})(u_i-\overline{u})}
-{p\lim\sum_{i=1}^n(z_i-\overline{z})(x_i-\overline{x})} \\ 
-&amp;=\frac{p\lim\frac{1}{n}\sum_{i=1}^n(z_i-\overline{z})(u_i-\overline{u})}
-{p\lim\frac{1}{n}\sum_{i=1}^n(z_i-\overline{z})(x_i-\overline{x})} \\ 
-&amp;\approx\frac{Cov(z_i,u_i)}{Cov(z_i, x_i)}=0
-\end{aligned}
-\]</span> <span class="math inline">\(\hat{\beta}_{IV}\)</span> is a consistent estimator of <span class="math inline">\(\beta_1\)</span>.</p>
-</div>
-<div id="d" class="section level3">
-<h3>1(d)</h3>
-<p>In a small sample, <span class="math inline">\(\hat{\beta}_{IV}\)</span> is biased. But as the sample increases, <span class="math inline">\(\beta_{IV}\)</span> will probability converge to the <span class="math inline">\(\beta_1\)</span>. Therefore, in a large sample, IV estimator will never affect the consistency of the true estimator regardless of whether there exists an endogenous problem.</p>
+<p>In order to identify the DiD estimator, we need to assume the error term <span class="math inline">\(\epsilon_{it}\)</span></p>
 </div>
 </div>
-<div id="derivation-of-the-wald-estimator" class="section level2">
-<h2>2. Derivation of the Wald estimator</h2>
+<div id="replication-of-card-and-krueger-1994" class="section level2">
+<h2>2. Replication of Card and Krueger (1994)</h2>
 <div id="a-1" class="section level3">
 <h3>2(a)</h3>
-<p>From question 1, we know that</p>
+<pre class="r"><code># read csv file
+raw.data &lt;- read.csv(&#39;did_card_krueger.csv&#39;)
+
+# drop rows with sample equal to 0
+data &lt;- raw.data[raw.data$sample==1, ]</code></pre>
+<pre class="r"><code># check classes of all dataframe columns
+str(data)</code></pre>
 <p><span class="math display">\[
-\begin{aligned}
-\delta^{W}=\hat{\beta}_1&amp;=\frac{Cov(y_i,z_i)}{Cov(d_i,z_i)} \\
-&amp;=\frac{\mathbb{E}(y_i|z_i=1)-\mathbb{E}(y_i|z_i=1)}
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=1)}
-\\
-&amp;=\frac{\mathbb{E}(\beta_1+\beta_1d_i+u_i|z_i=1)-\mathbb{E}(\beta_1+\beta_1d_i+u_i|z_i=0)}
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0)} \\
-&amp;=\frac{\beta_1\mathbb{E}(d_i|z_i=1)+\mathbb{E}(u_i|z_i=1)-
-\beta_1\mathbb{E}(d_i|z_i=0)-\mathbb{E}(u_i|z_i=0)}
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0)} \\
-&amp;=\frac{\beta_1(\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0))+
-\mathbb{E}(u_i|z_i=1)-\mathbb{E}(u_i|z_i=0) }
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0)} \\
-&amp;=\beta_1+\frac{\mathbb{E}(u_i|z_i=1)-\mathbb{E}(u_i|z_i=0)}
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0)}
-\end{aligned}
+\text{state}
+\begin{cases}
+1 &amp; \text{NJ} \\
+0 &amp; \text{PA}
+\end{cases}
 \]</span></p>
+<pre class="r"><code># first interview wave
+ave.fte.NJ &lt;- mean(data$fte[data$state==1])
+ave.fte.PA &lt;- mean(data$fte[data$state==0])
+
+# second interview wave
+ave.fte2.NJ &lt;- mean(data$fte2[data$state==1])
+ave.fte2.PA &lt;- mean(data$fte2[data$state==0])
+
+cat(sprintf(&#39;The average employment in NJ for the first interview wave is %.2f
+           \nThe average employment in PA for the first interview wave is %.2f
+           \nThe average employment in NJ for the second interview wave is %.2f
+           \nThe average employment in PA for the second interview wave is %.2f&#39;, 
+           ave.fte.NJ, ave.fte.PA, ave.fte2.NJ, ave.fte2.PA))</code></pre>
+<p>The average employment in NJ for the first interview wave is 17.28</p>
+<p>The average employment in PA for the first interview wave is 20.11</p>
+<p>The average employment in NJ for the second interview wave is 17.56</p>
+<p>The average employment in PA for the second interview wave is 18.10</p>
+<pre class="r"><code># employment difference in NJ (treatment)
+ave.dfte.NJ &lt;- ave.fte2.NJ - ave.fte.NJ
+
+# employment difference in PA (comparison)
+ave.dfte.PA &lt;- ave.fte2.PA - ave.fte.PA
+
+cat(sprintf(
+&#39;Difference in average employment between second and first interviews in NJ is %.2f
+\nDifference in average employment between second and first interviews in PA is %.2f&#39;, 
+ave.dfte.NJ, ave.dfte.PA))</code></pre>
+<p>Difference in average employment between second and first interviews in NJ is 0.29</p>
+<p>Difference in average employment between second and first interviews in PA is -2.02</p>
+<pre class="r"><code>didfte &lt;- ave.dfte.NJ - ave.dfte.PA
+
+cat(sprintf(&#39;The difference between NJ and PA of the time differences is %.2f&#39;, 
+            didfte))</code></pre>
+<p>The difference between NJ and PA of the time differences is 2.30</p>
+In order to obtain a valid estimate of the employment effect, the following conditions must be fulfilled:
+<p>From the DiD estimator, we see an increase in employment in New Jersey where the minimum wage was increased.</p>
 </div>
 <div id="b-1" class="section level3">
 <h3>2(b)</h3>
-<p>In order to identify <span class="math inline">\(\beta_1\)</span> using the instrument, we need <span class="math display">\[
-\frac{\mathbb{E}(u_i|z_i=1)-\mathbb{E}(u_i|z_i=0)}
-{\mathbb{E}(d_i|z_i=1)-\mathbb{E}(d_i|z_i=0)}=0
-\iff
-\mathbb{E}(u_i|z_i=1)=\mathbb{E}(u_i|z_i=0)
-\]</span></p>
-<p></p>
-<p>Only instrument assumption can be tested empirically. The vadility of other assumptions must be assessd on a case-by-case basis.</p>
+<pre class="r"><code># subset data in NJ
+data.NJ &lt;- data[data$state==1, ]
+
+# high wage in NJ (comparison)
+data.NJ.hw &lt;- data.NJ[data.NJ$wage_st&gt;=5, ]
+
+# low wage in NJ (treatment)
+data.NJ.lw &lt;- data.NJ[data.NJ$wage_st&lt;5, ]
+
+# DiD estimator of starting wages obtained within NJ data
+didw.NJ &lt;- mean(data.NJ.lw$dw)-mean(data.NJ.hw$dw)
+
+# DiD estimator of employment obtained within NJ data
+didfte.NJ &lt;- mean(data.NJ.lw$dfte)-mean(data.NJ.hw$dfte)
+
+cat(sprintf(&#39;The relative impact of the minimum wage on starting wages is %.2f
+            \nThe relative impact of the minimum wage on employment is %.2f&#39;, 
+            didw.NJ, didfte.NJ))</code></pre>
+<pre><code>## The relative impact of the minimum wage on starting wages is 0.62
+##             
+## The relative impact of the minimum wage on employment is 3.30</code></pre>
 </div>
-</div>
-<div id="self-selection-revisited" class="section level2">
-<h2>3. Self selection revisited</h2>
-<p><span class="math display">\[
-\begin{aligned}
-D_i&amp;=\pmb{1}(Y_{1i}-Y_{0i}&gt;0) \\
-&amp;=\pmb{1}(\beta_1+u_{1i}-u_{0i}&gt;0)
-\end{aligned}
-\]</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-    \Delta^{\text{ATE}}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}) \\
-    &amp;=\mathbb{E}[(\beta_0+\beta_1+u_{1i})-(\beta_0+u_{0i})] \\
-    &amp;=\mathbb{E}(\beta_1+u_{1i}-u_{0i}) \\
-    &amp;=\mathbb{E}(\beta_1)+\mathbb{E}(u_{1i})+\mathbb{E}(u_{0i}) \\
-    &amp;=\beta_1&gt;0
-\end{aligned}
-\]</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-\Delta^{\text{ATT}}&amp;=\mathbb{E}(Y_{1i}-Y_{0i}|D=1) \\
-&amp;=\mathbb{E}(\beta_1+u_{1i}-u_{0i}|D=1) \\
-&amp;=\beta_1+\mathbb{E}(u_{1i}-u_{0i}|D=1) \\
-&amp;=\Delta^{\text{ATE}}+\mathbb{E}(u_{1i}-u_{0i}|D=1) \\
-\mathbb{E}(u_{1i}-u_{0i}|D=1)&amp;=\mathbb{E}(u_{1i}-u_{0i}|\beta_1+u_{1i}-u_{0i}&gt;0) \\
-&amp;=\mathbb{E}(u_{1i}-u_{0i}|u_{1i}-u_{0i}&gt;-\beta_1)&gt;0
-\end{aligned}
-\]</span> ATT is larger than ATE.</p>
-<div id="b-2" class="section level3">
-<h3>3(b)</h3>
-<p><span class="math display">\[
-\begin{aligned}
-\Delta^{\text{naive}}&amp;=\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=0)\\
-&amp;=\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=0)
-\color{red}{-\mathbb{E}(Y_{0i}|D=1)+\mathbb{E}(Y_{0i}|D=1)} \\
-&amp;=\underbrace{\mathbb{E}(Y_{1i}|D=1)-\mathbb{E}(Y_{0i}|D=1)}_{\Delta^{\text{ATT}}}+
-\underbrace{\mathbb{E}(Y_{0i}|D=1)-\mathbb{E}(Y_{0i}|D=0)}_\text{selection bias}
-\end{aligned}
-\]</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-\text{selection bias}&amp;=\mathbb{E}(Y_{0i}|D=1)-\mathbb{E}(Y_{0i}|D=0) \\
-&amp;=\mathbb{E}(\beta_0+u_{0i}|\beta_1+u_{1i}-u_{0i}&gt;0)-\mathbb{E}(\beta_0+u_{0i}|u_{1i}-u_{0i}\leq0) \\
-&amp;=\mathbb{E}(u_{0i}|u_{1i}-u_{0i}&gt;-\beta_1)-\mathbb{E}(u_{0i}|u_{1i}-u_{0i}\leq0) \\
-&amp;=\mathbb{E}(u_{0i}|u_{1i}-u_{0i}&gt;-\beta_1)-\mathbb{E}(u_{0i}|u_{1i}-u_{0i}&gt;0)
-\quad\text{symmetric distribution} \\
-&amp;&gt;0
-\end{aligned}
-\]</span></p>
-<p>If individuals can self-select themselves into the program, the naive estimator will be larger since the selection bias is positive (<span class="math inline">\(\mathbb{E}(Y_{0i}|D=1)&gt;\mathbb{E}(Y_{0i}|D=0)\)</span>)</p>
-</div>
-<div id="c-1" class="section level3">
-<h3>3(c)</h3>
-<p><span class="math display">\[
-\begin{aligned}
-\text{LATE}&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}
-{\mathbb{E}(D|Z=1)-\mathbb{E}(D|Z=0)} \\
-&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}{\mathbb{E}(D_{1i}|Z=1)-\mathbb{E}(D_{0i}|Z=0)} \\
-&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}{\mathbb{E}(\pmb{1}(Y_{1i}-Y_{0i}+1&gt;0))-
-\mathbb{E}(\pmb{1}(Y_{1i}-Y_{0i}&gt;0))} \\
-&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}{\mathbb{E}(\pmb{1}(\beta_1+u_{1i}-u_{0i}+1&gt;0))-
-\mathbb{E}(\pmb{1}(\beta_1+u_{1i}-u_{0i}&gt;0))} \\
-&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}{\mathbb{E}(\beta_1+u_{1i}-u_{0i}+1)-
-\mathbb{E}(\beta_1+u_{1i}-u_{0i})} \\
-&amp;=\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0) \\
-&amp;=\text{ITT}
-\end{aligned}
-\]</span></p>
-</div>
-<div id="d-1" class="section level3">
-<h3>3(d)</h3>
-<p><span class="math display">\[
-\text{LATE}=\frac{\text{ITT}}{\text{proportion of compliers}}=\text{ITT}
-\]</span> We can derive that the proportion of compliers in the randomization experiment is 1. In other words, the instrument is randomly assigned with perfect compliance. Therefore, LATE=ATE.</p>
-</div>
-</div>
-<div id="application-angrists-1990-study-on-military-service" class="section level2">
-<h2>4. Application: Angrist’s (1990) study on military service</h2>
-<div id="a-2" class="section level3">
-<h3>4(a)</h3>
-<p><span class="math display">\[
-\ln(\widehat{\text{earnings}_i})=6.4364
-\underbrace{-0.0255}_\text{treatment effect}\cdot\text{veteran}_i+
-\underbrace{\beta\cdot x_i}_\text{other omitted control variables}
-\]</span></p>
-<p>Earnings are not only determined by the veteran status. There are some omitted variables.</p>
-</div>
-<div id="b-3" class="section level3">
-<h3>4(b)</h3>
-<table>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="left"><span class="math inline">\(Z=0\)</span></th>
-<th align="left"><span class="math inline">\(Z=1\)</span></th>
+<div id="c" class="section level3">
+<h3>2(c)</h3>
+<pre class="r"><code>library(stargazer)</code></pre>
+<pre class="r"><code># regress change of employment on state 
+dfte.did1 &lt;- lm(dfte ~ as.factor(state), data=data)
+
+# regress change of starting wages on state
+dw.did1 &lt;- lm(dw ~ as.factor(state), data=data)
+
+# regress change of employment on state and other control variables
+dfte.did2 &lt;- lm(dfte ~ as.factor(state) + 
+                  as.factor(co_owned) + as.factor(chain), data=data)
+
+# regress change of starting wages on state and other control variables
+dw.did2 &lt;- lm(dw ~ as.factor(state) + 
+                as.factor(co_owned) + as.factor(chain), data=data)
+
+stargazer(dfte.did1, dw.did1, dfte.did2, dw.did2, keep=&#39;state&#39;, 
+          header=F, font.size=&#39;small&#39;, keep.stat=c(&#39;n&#39;, &#39;rsq&#39;), type=&#39;html&#39;, 
+          title=&#39;Comparison between regressions with and without control variables&#39;, 
+          column.labels=c(&#39;No controls&#39;, &#39;No controls&#39;, &#39;Controls&#39;, &#39;Controls&#39;))</code></pre>
+<table style="text-align:center">
+<caption>
+<strong>Comparison between regressions with and without control variables</strong>
+</caption>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
 </tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left"><span class="math inline">\(D=0\)</span></td>
-<td align="left">5,928</td>
-<td align="left">1,875</td>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
 </tr>
-<tr class="even">
-<td align="left"><span class="math inline">\(D=1\)</span></td>
-<td align="left">1,400</td>
-<td align="left">863</td>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
 </tr>
-</tbody>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+dfte
+</td>
+<td>
+dw
+</td>
+<td>
+dfte
+</td>
+<td>
+dw
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+No controls
+</td>
+<td>
+No controls
+</td>
+<td>
+Controls
+</td>
+<td>
+Controls
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+as.factor(state)1
+</td>
+<td>
+2.302<sup>**</sup>
+</td>
+<td>
+0.504<sup>***</sup>
+</td>
+<td>
+2.297<sup>*</sup>
+</td>
+<td>
+0.504<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.167)
+</td>
+<td>
+(0.048)
+</td>
+<td>
+(1.174)
+</td>
+<td>
+(0.047)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+351
+</td>
+<td>
+351
+</td>
+<td>
+351
+</td>
+<td>
+351
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.011
+</td>
+<td>
+0.243
+</td>
+<td>
+0.021
+</td>
+<td>
+0.279
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
 </table>
-<p>Due to monotonicity:</p>
-<p>Due to randomization:</p>
-<p><strong>Note:</strong></p>
 </div>
-<div id="c-2" class="section level3">
-<h3>4(c)</h3>
-<table>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="left"><span class="math inline">\(Z=0\)</span></th>
-<th align="left"><span class="math inline">\(Z=1\)</span></th>
+<div id="d" class="section level3">
+<h3>2(d)</h3>
+<pre class="r"><code># subset PA data
+data.PA &lt;- data[data$state==0, ]
+
+# create a new variable like gap for restaurants in PA
+data.PA$gap4PA &lt;- ifelse(data.PA$wage_st&lt;5.05, (5.05-data.PA$wage_st)/data.PA$wage_st, 0)</code></pre>
+<pre class="r"><code># regress change in employment on gap4PA (PA)
+dfte.PA &lt;- lm(dfte ~ gap4PA, data=data.PA)
+
+# regress change in wages on gap4PA (PA)
+dw.PA &lt;- lm(dw ~ gap4PA, data=data.PA)
+
+# regress change in employment on gap (NJ)
+dfte.NJ &lt;- lm(dfte ~ gap, data=data[data$state==1, ])
+
+# regress change in wages on gap (NJ)
+dw.NJ &lt;- lm(dw ~ gap, data=data[data$state==1, ])
+
+stargazer(dfte.PA, dw.PA, dfte.NJ, dw.NJ, header=F, 
+          keep.stat=c(&#39;n&#39;, &#39;rsq&#39;), omit=&#39;Constant&#39;, 
+          column.labels=c(&#39;PA&#39;, &#39;PA&#39;, &#39;NJ&#39;, &#39;NJ&#39;), 
+          title=&#39;Placebo test&#39;, type=&#39;html&#39;)</code></pre>
+<table style="text-align:center">
+<caption>
+<strong>Placebo test</strong>
+</caption>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
 </tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left"><span class="math inline">\(D=0\)</span></td>
-<td align="left"><span class="math inline">\(\widehat{\mathbb{E}(Y)}=6.4472\)</span></td>
-<td align="left"><span class="math inline">\(\widehat{\mathbb{E}(Y)}=6.4028\)</span></td>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
 </tr>
-<tr class="even">
-<td align="left"><span class="math inline">\(D=1\)</span></td>
-<td align="left"><span class="math inline">\(\widehat{\mathbb{E}(Y)}=6.4076\)</span></td>
-<td align="left"><span class="math inline">\(\widehat{\mathbb{E}(Y)}=6.4289\)</span></td>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
 </tr>
-</tbody>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+dfte
+</td>
+<td>
+dw
+</td>
+<td>
+dfte
+</td>
+<td>
+dw
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+PA
+</td>
+<td>
+PA
+</td>
+<td>
+NJ
+</td>
+<td>
+NJ
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+gap4PA
+</td>
+<td>
+1.121
+</td>
+<td>
+2.544<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(18.142)
+</td>
+<td>
+(0.540)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+gap
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+14.259<sup>**</sup>
+</td>
+<td>
+4.379<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(6.468)
+</td>
+<td>
+(0.111)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+66
+</td>
+<td>
+66
+</td>
+<td>
+285
+</td>
+<td>
+285
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.0001
+</td>
+<td>
+0.258
+</td>
+<td>
+0.017
+</td>
+<td>
+0.846
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
 </table>
-<p>In <span class="math inline">\(Z=0\)</span> group: <span class="math display">\[
-\frac{p_C}{p_N+p_C}\times \mathbb{E}(Y_0|Z=0,C)+\frac{p_N}{p_N+p_C}\times
-\mathbb{E}(Y_0|Z=0,N)=6.4472 \implies
-\mathbb{E}(Y_0|Z=0,C)=6.666
-\]</span></p>
-<p>In <span class="math inline">\(Z=1\)</span> group: <span class="math display">\[
-\frac{p_C}{p_A+p_C}\times \mathbb{E}(Y_1|Z=1,C)+\frac{p_A}{p_A+p_C}\times
-\mathbb{E}(Y_1|Z=1,A)=6.4289 \implies
-\mathbb{E}(Y_1|Z=1,C)=6.4691
-\]</span></p>
-</div>
-<div id="d-2" class="section level3">
-<h3>4(d)</h3>
-<p><span class="math display">\[
-\begin{aligned}
-\delta&amp;=\frac{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)}{\mathbb{E}(Y|Z=1)-\mathbb{E}(Y|Z=0)} \\
-&amp;=\frac{p_C[\mathbb{E}(Y_1|Z=1,C)-\mathbb{E}(Y_0|Z=0,C)]}{p_C} \\
-&amp;=\mathbb{E}(Y_1|Z=1,C)-\mathbb{E}(Y_0|Z=0,C) \\
-&amp;=6.4691-6.666 \\
-&amp;=-0.1969
-\end{aligned}
-\]</span></p>
-</div>
-</div>
-<div id="iv-in-action" class="section level2">
-<h2>5. IV in action</h2>
-<div id="a-3" class="section level3">
-<h3>5(a)</h3>
-<pre class="r"><code># load relevant libraries
-library(haven) # read dta file
-library(lattice) # density plot
-library(stargazer) # print summary statistics
-library(AER) # iv regression</code></pre>
-<pre class="r"><code>d.mort &lt;- read_dta(&#39;mortality.dta&#39;)</code></pre>
-<pre class="r"><code># outcome of interest
-summary(d.mort$before67dead)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-## 0.00000 0.00000 0.00000 0.07311 0.00000 1.00000</code></pre>
-<pre class="r"><code># treatment
-summary(d.mort$dist65_ageATend4emp)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  -4.833   5.000   6.333   6.499   8.000  11.000</code></pre>
-<pre class="r"><code># instrument
-summary(d.mort$Zd_during)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0000  0.0000  0.0000  0.4787  1.0000  1.0000</code></pre>
-</div>
-<div id="b-4" class="section level3">
-<h3>5(b)</h3>
-<pre class="r"><code>model.ols1 &lt;- lm(before67dead ~ dist65_ageATend4emp + czeit1yATage50 + 
-                   czeit2yATage50 + czeit5yATage50 + czeit10yATage50 + 
-                   czeit25yATage50 + I(czeit1yATage50^2) + I(czeit2yATage50^2) + 
-                   I(czeit5yATage50^2) + I(czeit10yATage50^2) + 
-                   I(czeit25yATage50^2) + as.factor(halfyearOFbirth) + 
-                   as.factor(nutsATage50), data=d.mort)
-
-model.ols2 &lt;- lm(before67dead ~ dist65_ageATend4emp, data=d.mort)
-
-stargazer(model.ols1, model.ols2, keep.stat=&#39;n&#39;, header=F, 
-          keep=&#39;dist65_ageATend4emp&#39;, font.size=&#39;small&#39;, 
-          column.labels=c(&#39;Control&#39;, &#39;Non-control&#39;), digits=4, 
-          title=&#39;Comparison between control and non-control&#39;)</code></pre>
-</div>
-<div id="c-3" class="section level3">
-<h3>5(c)</h3>
-<p>As we can see, the coefficient on the treatment slightly increases from column 1 (with control variables) to column 2 (without control variables).</p>
-<p>Significance</p>
-<p>We can reject the null hypothesis in both cases but we are more confident to reject <span class="math inline">\(\beta_1=0\)</span> with control variables.</p>
-</div>
-<div id="d-3" class="section level3">
-<h3>5(d)</h3>
-<p>Omitted-variable bias</p>
-<p>Health status. If people are in a bad physical condition, they are more likely to spend less years in their early retirement or even die before retirement. Therefore, the estimator for <span class="math inline">\(\beta_1\)</span> is biased upwards and we expect a positive bias.</p>
-</div>
-<div id="e" class="section level3">
-<h3>5(e)</h3>
-<pre class="r"><code>densityplot(~ d.mort$dist65_ageATend4emp, auto.key = TRUE, 
-            xlab = &#39;the number of years spent in early retirement&#39;, 
-            data = data.frame(treatment=d.mort$dist65_ageATend4emp, 
-                              instrument=d.mort$Zd_during))</code></pre>
-<p><img src="data:image/png;base64,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" width="672" /></p>
-</div>
-<div id="f" class="section level3">
-<h3>5(f)</h3>
-<pre class="r"><code># first stage regression
-iv.1st.stage &lt;- ivreg(dist65_ageATend4emp ~ Zd_during*as.factor(halfyearOFbirth) + 
-                        czeit1yATage50 + czeit2yATage50 + czeit5yATage50 + 
-                        czeit10yATage50 + czeit25yATage50 + I(czeit1yATage50^2) + 
-                        I(czeit2yATage50^2) + I(czeit5yATage50^2) + I(czeit10yATage50^2) + 
-                        I(czeit25yATage50^2) + as.factor(halfyearOFbirth) + 
-                        as.factor(nutsATage50), data=d.mort)
-
-stargazer(iv.1st.stage, keep=&#39;Zd_during&#39;, keep.stat=&#39;n&#39;, header=F, 
-          font.size=&#39;small&#39;, title=&#39;First stage regression&#39;, no.space=T)</code></pre>
-</div>
-<div id="g" class="section level3">
-<h3>5(g)</h3>
-<pre class="r"><code># second stage regression
-iv.2nd.stage &lt;- lm(before67dead ~ predict(iv.1st.stage) + czeit1yATage50 + 
-                     czeit2yATage50 + czeit5yATage50 + czeit10yATage50 + 
-                     czeit25yATage50 + I(czeit1yATage50^2) + I(czeit2yATage50^2) + 
-                     I(czeit5yATage50^2) + I(czeit10yATage50^2) + 
-                     I(czeit25yATage50^2) + as.factor(halfyearOFbirth) + 
-                     as.factor(nutsATage50), data=d.mort)
-
-# iv regression  
-model.iv &lt;- ivreg(before67dead ~ dist65_ageATend4emp + czeit1yATage50 + 
-                     czeit2yATage50 + czeit5yATage50 + czeit10yATage50 + 
-                     czeit25yATage50 + I(czeit1yATage50^2) + I(czeit2yATage50^2) + 
-                    I(czeit5yATage50^2) + I(czeit10yATage50^2) + I(czeit25yATage50^2) + 
-                    as.factor(halfyearOFbirth) + as.factor(nutsATage50) | 
-                    Zd_during*as.factor(halfyearOFbirth) + czeit1yATage50 + 
-                    czeit2yATage50 + czeit5yATage50 + czeit10yATage50 + 
-                    czeit25yATage50 + I(czeit1yATage50^2) + I(czeit2yATage50^2) + 
-                    I(czeit5yATage50^2) + I(czeit10yATage50^2) + I(czeit25yATage50^2) + 
-                    as.factor(halfyearOFbirth) + as.factor(nutsATage50), data=d.mort)
-
-stargazer(iv.2nd.stage, model.iv, font.size=&#39;small&#39;, header=F, 
-          keep.stat=c(&#39;n&#39;, &#39;f&#39;), title=&#39;Comparsion between 2SLS and ivreg&#39;, 
-          keep=c(&#39;iv.1st.stage&#39;, &#39;dist65_ageATend4emp&#39;), digits=4)</code></pre>
-<p>As we can see, <strong>2SLS</strong> and <strong>ivreg</strong> yield exactly the same estimate but with different standard errors.</p>
-</div>
-<div id="h" class="section level3">
-<h3>5(h)</h3>
-<pre class="r"><code>stargazer(model.ols1, model.iv, font.size=&#39;small&#39;, header=F,  
-          keep.stat=c(&#39;n&#39;, &#39;f&#39;), keep=&#39;dist65_ageATend4emp&#39;, 
-          title=&#39;Comparison between OLS and 2SLS results&#39;, digits=4)</code></pre>
-<p>As expected, from column(1) to column(2), we see a decrease in the coefficient on <em>dist65_ageATend4emp</em>, which verifies our statement in 5(d) - a positive bias in the OLS estimator.</p>
+<ul>
+<li><p>Column(1) and column(3) show that the coefficient on gap for Pennsylvania is small and not statistically different from zero while the coefficient on gap for New Jersey is large and statistically different from zero at 5% significance level. We cannot reject the null hypothesis in column(1).</p></li>
+<li><p>Column(2) and column(4) show that the coefficient on gap for Pennsylvania is smaller than the coefficient on gap for New Jersey. We can see that coefficient from <span class="math inline">\(\text{dw}=\beta\cdot\text{gap}+\epsilon\)</span> captures the impact of minimum wage increase on starting wage in those restaurants that were required to raise their wage when the policy was put in place. Such effects are stronger in New Jersey than in Pennsylvania.</p></li>
+</ul>
+<p>We know that there was no minimum wage increase in Pennsylvania during that period. We perform a <strong>placebo test</strong> using a “fake” treatment group. In this setting, the “fake” treatment group is the Pennsylvania where the minimum wage was assumed to be increased but actually remained at the federal level. Since the “fake” treatment group should not be affected by the program, we should expect small and insignificant coefficient in column(1) compared to the coefficient in column(3) and smaller coefficient in column(2) than in column(4). The regression results are consistent with our expectation and support the parallel trend assumption.</p>
 </div>
 </div>
 </div>
