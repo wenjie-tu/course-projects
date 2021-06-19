@@ -1,4 +1,9 @@
 # Course Projects
-Course projects at UZH/ETH
+This directory is made for the course projects I have done.
 
-In this repository, you can see the projects/exercises I have done. :wink:
+Course abbreviation:
+
+* **BDM:** *Big Data Methods for Economists*
+* **FDS:** *Foundations of Data Science*
+* **PECI:** *Program Evaluation and Causal Inference*
+

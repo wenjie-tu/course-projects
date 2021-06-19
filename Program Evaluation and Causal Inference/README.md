@@ -1,1 +1,0 @@
-### Main contributor to the group work

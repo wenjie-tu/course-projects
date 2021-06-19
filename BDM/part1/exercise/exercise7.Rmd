@@ -1,0 +1,229 @@
+---
+title: "Exercise 7"
+subtitle: "Support Vector Machines"
+author: 
+ - Wenjie Tu
+output: pdf_document
+date: "March 2021"
+---
+
+```{r include=F}
+# knitr::opts_chunk$set(comment=NA)
+```
+
+### (a)
+```{r warning=F, message=F, reslts='asis'}
+# load relevant libraries
+library(ISLR) # OJ dataset
+library(e1071) # SVM
+library(scales) # print percentage
+
+# check the structure of the dataset
+head(OJ)
+
+# set the seed for reproducibility
+set.seed(2021)
+
+# get a random sample of 800 indices from the dataset
+train.idx <- sample(1:dim(OJ)[1], size=800, replace=F)
+
+# get training data and test data
+train <- OJ[train.idx,]
+test <- OJ[-train.idx,]
+
+# initialize dataframe to store error rates
+results <- data.frame(matrix(ncol=2,nrow=6))
+colnames(results) <- c('Train ER', 'Test ER')
+rownames(results) <- c('Linear with cost = 0.01','Linear with optimal cost',
+              'Radial with default cost','Radial with optimal cost',
+              'Polynomial with default cost','Polynomial with optimal cost')
+```
+
+### (b)
+\textbf{Linear Kernel}
+$$
+K(x_i,x_i')=\sum_{j=1}^px_{ij}x_{i'j}
+$$
+```{r warning=F, message=F}
+# use a support vector classifier
+svm.linear <- svm(Purchase~., kernel='linear', data=train, cost=0.01)
+summary(svm.linear)
+```
+
+The summary statistics tells us that a linear kernel was used with $cost=0.01$, and there were 434 support vectors, 217 in $CH$ class and 217 in $MM$ class.
+
+
+### (c)
+```{r reslts='asis', message=F, warning=F}
+# calculate the training error rate
+train.error.rate <- mean(svm.linear$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(svm.linear, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[1,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+
+### (d)
+```{r reslts='asis', message=F, warning=F}
+# set the seed for reproducibility
+set.seed(0308)
+
+# search for the optimal cost from 0.01 to 10
+tune.out <- tune(svm, Purchase~., data=train, kernel='linear', 
+                ranges=list(cost=10^seq(-2, 1, by=0.2)))
+summary(tune.out)
+
+# print the best cost
+cost.best <- round(tune.out$best.parameters$cost, digits=3)
+print(paste('The optimal cost is', cost.best))
+```
+
+### (e)
+```{r}
+# calculate the training error rate 
+train.error.rate <- mean(tune.out$best.model$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(tune.out$best.model, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[2,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+
+### (f)
+\textbf{Radial Kernel}
+$$
+K(x_i,x_i')=\exp(-\gamma\sum_{j=1}^p(x_{ij}-x_{i'j})^2)
+$$
+```{r reslts='asis', message=F, warning=F}
+# set the seed for reproducibility
+set.seed(2020)
+
+# use support vector machine with a radial kernel
+svm.radial <- svm(Purchase~., data=train, kernel='radial')
+summary(svm.radial)
+
+# calculate the training error rate
+train.error.rate <- mean(svm.radial$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(svm.radial, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[3,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+The summary statistics tells us that a radial kernel was used with a default $\gamma=\frac{1}{Dimension}$, and there were 639 support vectors, among which 321 observations were classified as $CH$ class and 318 were classified as $MM$ class.
+
+```{r reslts='asis', message=F, warning=F}
+# set the seed for reproducibility
+set.seed(0901)
+
+# search for the optimal cost from 0.01 to 10
+tune.out <- tune(svm, Purchase~., data=train, kernel='radial', 
+                ranges=list(cost=10^seq(-2, 1, by=0.2)))
+summary(tune.out)
+
+# calculate the training error rate
+train.error.rate <- mean(tune.out$best.model$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(tune.out$best.model, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[4,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+
+### (g)
+\textbf{Polynomial Kernel}
+$$
+K(x_i,x_i')=(1+\sum_{j=1}^px_{ij}x_{i'j})^d
+$$
+```{r reslts='asis', message=F, warning=F}
+# set the seed for reproducibility
+set.seed(0316)
+
+# use support vector machine with a polynomial kernel
+svm.polynomial <- svm(Purchase~., data=train, kernel='polynomial', 
+                       degree=2)
+summary(svm.polynomial)
+
+# calculate the training error rate
+train.error.rate <- mean(svm.polynomial$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(svm.polynomial, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[5,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+The summary statistics tells us that a polynomial kernel was used with $degree=2$ and $cost=1$, and there were 642 support vectors, among which 324 observations were classified as $CH$ class and 318 observations were classified as $MM$ class.
+
+```{r reslts='asis', message=F, warning=F}
+# set the seed for reproducibility
+set.seed(0323)
+
+# search for the optimal cost from 0.01 to 10
+tune.out <- tune(svm, Purchase~., data=train, kernel='polynomial', 
+                ranges=list(cost=10^seq(-2, 1, by=0.2)))
+summary(tune.out)
+
+# calculate the training error rate
+train.error.rate <- mean(tune.out$best.model$fitted!=train$Purchase)
+
+# calculate the test error rate
+test.predict <- predict(tune.out$best.model, newdata=test)
+test.error.rate <- mean(test.predict!=test$Purchase)
+
+# store the error rates
+results[6,] <- c(train.error.rate, test.error.rate)
+
+# print error rates
+cat(sprintf('Training error rate is %s
+            \nTest error rate is %s', 
+            label_percent(accuracy = 0.01)(train.error.rate), 
+            label_percent(accuracy = 0.01)(test.error.rate)))
+```
+
+### (h)
+```{r reslts='asis', message=F, warning=F, echo=F}
+library(knitr)
+kable(round(results, digits=3), caption='Summary results')
+```
+Relatively speaking, support vector classifier (SVM with a linear kernel) gives us the most decent results on both training data and test data. As shown on the table above, we can tell that SVM with a radial kernel and SVM with a polynomial kernel overfit the data. They perform well on the training data but bad on the test data. When evaluating a machine learning model, we also have to consider the generalization of the trained model.
