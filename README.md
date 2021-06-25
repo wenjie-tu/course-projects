@@ -1,5 +1,5 @@
 # Course Projects
-This directory is made for the course projects I have done.
+This repository is made for the course projects I have done.
 
 Course abbreviation:
 
