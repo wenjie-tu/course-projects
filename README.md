@@ -1,9 +1,13 @@
 # Course Projects
 This repository is made for the course projects I have done.
 
-Course abbreviation:
+**Table of Content**
 
-* **BDM:** *Big Data Methods for Economists*
-* **FDS:** *Foundations of Data Science*
-* **PECI:** *Program Evaluation and Causal Inference*
+| Course title abbreviation | Course full title                                         |
+| ------------------------- | --------------------------------------------------------- |
+| BDM                       | [Big Data Methods for Economists](BDM/README.md)          |
+| FDS                       | [Foundations of Data Science](FDS/README.md)              |
+| PECI                      | [Program Evaluation and Causal Inference](PECI/README.md) |
+
+
 
