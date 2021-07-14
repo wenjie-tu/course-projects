@@ -1,0 +1,169 @@
+---
+title: "Impact of Euthanasia on Suicide Rates among Elderly"
+subtitle: "Empirical Evidence from European Regions"
+author:
+  - Wenjie Tu
+  - Christian Birchler
+date: "Spring Semester 2021"
+output: pdf_document
+---
+
+```{r echo=F}
+Sys.setenv(LANG="en")
+rm(list=ls())
+setwd('F:/University of Zurich/Second Semester/Program Evaluation and Causal Inference/suicide')
+```
+
+```{r message=F, warning=F}
+# import libraries
+library(ggplot2)
+library(stargazer)
+library(tidyverse)
+library(plm)
+library(Synth)
+library(gsynth)
+library(panelView)
+```
+
+```{r}
+# read data
+dta <- read.csv('./References/hlth_cd_acdr_1_Data.csv')
+```
+
+### Data Preparation
+
+```{r}
+# data types of columns
+str(dta)
+```
+
+```{r}
+# drop columns
+dta <- dta[, !names(dta) %in% c('UNIT', 'SEX', 'AGE')]
+
+# rename columns
+colnames(dta) <- c('year', 'region', 'dth.cause', 'dth.rate')
+
+# create a variable for country code
+dta$country <- substr(dta$region, 1, 2)
+```
+
+```{r}
+# drop countries
+dta <- dta[!dta$country %in% c('HU', 'AT', 'CZ', 'DE'), ]
+```
+
+Reasons for dropping these countries:
+
+* We included these countries separately or all at once and found that the estimated missing counterfactuals do not fit the observed outcomes very well in pre-treatment periods in the plot.
+* We also looked at regional suicide rates in these countries separately and found that regional observations vary a lot even within the same country and the aggregate suicide rates (at country levels) are higher than other countries. We assume that there exist some unobservable region-specific interventions.
+* We aggregated regional suicide rates to country levels and there is no (quasi-) parallel trend in country-level suicide rates between these countries and Netherlands.
+
+We therefore conclude that including these countries all at once or separately would bias the missing counterfactual estimation in some sense and it is better to drop them.
+
+```{r}
+# subset data by cause of death
+d.suicide <- dta[dta$dth.cause=='Intentional self-harm', ]
+
+d.suicide <- subset(d.suicide, select=-c(dth.cause))
+```
+
+```{r}
+# create a dummy variable to indicate the time when the treatment started
+d.suicide$time <- ifelse(d.suicide$year >= 2002, 1, 0)
+
+# create a dummy variable to identify the group exposed to the treatment
+d.suicide$treated <- ifelse(d.suicide$country == 'NL', 1, 0)
+
+# create an interaction between time and treated.
+d.suicide$did <- d.suicide$time*d.suicide$treated
+```
+
+```{r}
+# create a numerical variable for region codes
+d.suicide$unit.num <- factor(
+  d.suicide$region, 
+  levels = unique(d.suicide$region), 
+  labels = seq(length(unique(d.suicide$region)))
+)
+
+d.suicide$unit.num <- as.numeric(d.suicide$unit.num)
+
+d.suicide <- as.data.frame(d.suicide)
+
+str(d.suicide)
+```
+
+### Data Visualization
+
+```{r}
+# visualize the data structure
+panelView(dth.rate ~ did, data=d.suicide, cex.axis=2, 
+          index = c('unit.num', 'year'), pre.post=T)
+```
+
+```{r}
+# visualize the outcome variable
+# different colors correspond to different treatment status.
+panelView(dth.rate~did, data=d.suicide, index=c('unit.num', 'year'), 
+          type='outcome', ylab='crude suicide rates', 
+          main='Legalization of Euthanasia and Crude Suicide Rates')
+```
+
+### Data Analysis
+
+```{r message=F}
+set.seed(2021)
+out <- gsynth(dth.rate ~ did, data = d.suicide, 
+              EM = TRUE, # Expectation Maximization algorithm will be used
+              index = c("unit.num","year"), # specify group and time variables
+              force='two-way', # two-way fixed effects
+              CV = TRUE, # cross validation
+              r = c(0, 5), # the number of factors
+              se = TRUE, # uncertainty estimates will be produced
+              inference = 'parametric', # inferential method
+              nboots = 1000, # the number of bootstrap runs
+              parallel = TRUE, # parallel computing
+              cores = 5, # the number of cores used in parallel computing
+              seed = 2021 # set seed for reproducibility
+              )
+```
+
+* **sigma2** stands for the estimated variance of the error term.
+* **IC** represents the Bayesian Information Criterion.
+* **MPSE** is the Mean Squared Prediction Error.
+
+The cross-validation procedure selects an $r$ that minimizes the MSPE. When $r=0$ (no factor is assumed), the estimates are close to what we obtain from difference-in-differences.
+
+```{r message=F, warning=F}
+plot(out, main='Estimated ATT', ylab="estimated ATT")
+
+plot(out, type = "counterfactual", ylab="crude suicide rate", 
+     raw = "none", main="Treated and Counterfactual Averages")
+```
+
+In the plot of **Estimated ATT**, the estimated ATT is centered around zero horizontal line in pre-treatment periods and is statistically different from zero in post-treatment periods.
+
+In the plot of **Treated and Counterfactual Averages**, the estimated curve for missing counterfactuals fits the curve for observed outcome averages quite well in pre-treatment periods and they demonstrate different patterns in post-treatment periods. The plot is consistent with the criteria for synthetic control group.
+
+```{r message=F, results='asis'}
+stargazer(out$est.att, header=F, title="ATT by period", type = "text")
+
+stargazer(out$est.avg, header=F, type = "text", title="ATT averaged over all periods")
+```
+
+```{r}
+d.suicide <- pdata.frame(d.suicide, index = c("unit.num", "year"))
+```
+
+```{r warning=F, message=F}
+didreg.ols <- lm(dth.rate ~ treated + time + did, data = d.suicide)
+
+didreg.fe <- plm(dth.rate ~ treated + time + did, data = d.suicide, 
+                 effect = "twoways", model = "within")
+stargazer(didreg.ols, didreg.fe, header = F, type = "text", 
+          keep = "did", dep.var.caption = "suicide rate", 
+          covariate.labels = "ATT.avg", single.row = T, keep.stat = "n", no.space = T, 
+          column.labels = c("pooling", "two-way FE"), dep.var.labels.include = F, 
+          title = "ATT averaged without using GSC")
+```
