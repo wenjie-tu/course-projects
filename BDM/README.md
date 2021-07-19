@@ -11,6 +11,6 @@ This directory is made for the course *Big Data Methods for Economists*
 * Part 2: Application
   * Task: Housing Rents Prediction in Switzerland
     * [Task Description](part2/task_description.pdf)
-    * [Codes](part2/Part2_TuWenjie.ipynb)
+    * [Code](part2/Part2_TuWenjie.ipynb)
     * [Report](part2/report.pdf)
 

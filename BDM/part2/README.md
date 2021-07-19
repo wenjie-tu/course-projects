@@ -4,7 +4,7 @@ In this project, I explored many different machine learning algorithms in predic
 
 * [Task Description](task_description.pdf)
 
-* [Codes](Part2_TuWenjie.ipynb)
+* [Code](Part2_TuWenjie.ipynb)
 
 * [Report](report.pdf)
 
