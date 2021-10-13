@@ -13,3 +13,5 @@ This directory is made for the course *Foundations of Data Science*
     * [Code](NeuralNetworks/TransferLearning/CNNTransferLearning.ipynb)
     * [Report](NeuralNetworks/report-practical3.pdf)
 
+**Note:** due to the tutoring work for *FDS* course, the code and reports are made temporarily inaccessible to the public.
+
