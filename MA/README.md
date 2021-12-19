@@ -18,5 +18,7 @@ This directory is made for the seminar *Meta-Analysis*
 
 * Topic
 * Literature Review
+* Data
+  * Search for Studies
 * Summaries of the Selected Studies
 
