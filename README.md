@@ -6,6 +6,7 @@ This repository is made for the course projects I have done.
 | Course title abbreviation | Course full title                                         |
 | ------------------------- | --------------------------------------------------------- |
 | BDM                       | [Big Data Methods for Economists](BDM/README.md)          |
+| FBM                       | [Foundations of Bayesian Methodology](FBM/README.md)      |
 | FDS                       | [Foundations of Data Science](FDS/README.md)              |
 | MA                        | [Meta Analysis](MA/README.md)                             |
 | PECI                      | [Program Evaluation and Causal Inference](PECI/README.md) |
