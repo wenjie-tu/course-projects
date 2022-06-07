@@ -1,4 +1,4 @@
-# Priori elicitation for placebo and treatment groups
+# Priori elicitation using meta-analysis
 
 In this chapter, we attempt to replicate the results from Baeten et al. (2013) according to the descriptive information in the paper. We first perform a random-effects meta-analysis of the 8 historical trials for placebo using JAGS to derive the posterior response rate for placebo. We next try to elicit the prior distribution for treatment according to the descriptive information in Baeten et al. (2013)[(Appendix)]. 
 

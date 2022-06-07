@@ -1,4 +1,4 @@
-# Classical and Bayesian analyses and moment matching
+# Priori elicitation using moment matching
 
 In this chapter, we first provide classical and Bayesian analyses for Secukinumab and placebo separately. We next implement a moment-matching function that computes $\alpha$ and $\beta$ shape parameters of a Beta distribution with known mean and variance.
 

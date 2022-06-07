@@ -1,4 +1,4 @@
-# Study design and sample size computation
+# Bayesian analysis and sample size computation
 
 In this chapter, we provide an interesting approach to plan a study. At this stage, there is no data but only hypotheses about the relation of the treatment an placebo groups. We introduce the proof of concept (POC) that requires the ASAS20 response rate on Secukinumab larger than that on placebo. With data from 20 patients on Secukinumab and 5 patients on placebo, Monte Carlo simulations are conducted to show that $\text{POC}>90\%$, for true response rates of 25% on placebo and 60% on secukinumab.
 
